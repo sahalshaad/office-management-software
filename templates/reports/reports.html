@@ -1,0 +1,36 @@
+{% extends "base/app.html" %}
+{% block page_title %}Reports{% endblock %}
+{% block content %}
+<section class="surface">
+  <div class="section-head">
+    <div><p class="eyebrow">Exports</p><h2 class="section-title">Attendance reports</h2></div>
+    <div class="btn-group">
+      <a class="btn btn-light" href="{% url 'reports:attendance_csv' %}">CSV</a>
+      <a class="btn btn-light" href="{% url 'reports:attendance_xlsx' %}">Excel</a>
+      <a class="btn btn-light" href="{% url 'reports:attendance_pdf' %}">PDF</a>
+    </div>
+  </div>
+</section>
+<section class="surface mt-4">
+  <div class="section-head"><div><p class="eyebrow">Performance</p><h2 class="section-title">Productivity snapshot</h2></div></div>
+  <div class="responsive-table">
+    <table class="table align-middle">
+      <thead><tr><th>Employee</th><th>Attendance</th><th>Hours</th><th>Tasks</th><th>Score</th><th>Insight</th></tr></thead>
+      <tbody>
+        {% for item in productivity %}
+          <tr>
+            <td>{{ item.user.full_name }}</td>
+            <td>{{ item.attendance_percentage }}%</td>
+            <td>{{ item.working_hours }}</td>
+            <td>{{ item.task_completion_rate }}%</td>
+            <td><strong>{{ item.productivity_score }}</strong></td>
+            <td>{{ item.insight }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="text-secondary">No productivity data yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "base/app.html" %}
+{% block page_title %}Archive Record{% endblock %}
+{% block content %}
+<form method="post" class="surface">
+  {% csrf_token %}
+  <h2 class="section-title">Archive this record?</h2>
+  <p class="text-secondary">{{ object }}</p>
+  <button class="btn btn-danger">Archive</button>
+  <a class="btn btn-light" href="javascript:history.back()">Cancel</a>
+</form>
+{% endblock %}

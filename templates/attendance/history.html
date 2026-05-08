@@ -1,0 +1,37 @@
+{% extends "base/app.html" %}
+{% block page_title %}Attendance History{% endblock %}
+{% block content %}
+<section class="surface">
+  <div class="section-head">
+    <form method="get" class="filter-row">
+      <input class="form-control" type="date" name="date" value="{{ request.GET.date }}">
+      <button class="btn btn-outline-primary">Filter</button>
+    </form>
+    <div class="btn-group">
+      <a class="btn btn-light" href="{% url 'reports:attendance_csv' %}">CSV</a>
+      <a class="btn btn-light" href="{% url 'reports:attendance_xlsx' %}">Excel</a>
+      <a class="btn btn-light" href="{% url 'reports:attendance_pdf' %}">PDF</a>
+    </div>
+  </div>
+  <div class="responsive-table">
+    <table class="table align-middle">
+      <thead><tr><th>Date</th><th>Employee</th><th>Status</th><th>In</th><th>Out</th><th>Hours</th><th>Distance</th></tr></thead>
+      <tbody>
+        {% for record in records %}
+          <tr>
+            <td>{{ record.date }}</td>
+            <td>{{ record.user.full_name }}</td>
+            <td><span class="status-pill status-{{ record.status }}">{{ record.get_status_display }}</span></td>
+            <td>{{ record.punch_in_at|date:"H:i" }}</td>
+            <td>{{ record.punch_out_at|date:"H:i"|default:"-" }}</td>
+            <td>{{ record.working_hours }}</td>
+            <td>{{ record.punch_in_distance_m|default:"-" }}m</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7" class="text-secondary">No attendance records found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "base/app.html" %}
+{% block page_title %}Tasks{% endblock %}
+{% block content %}
+<section class="surface">
+  <div class="section-head">
+    <form method="get" class="filter-row">
+      <select class="form-select" name="status">
+        <option value="">All status</option>
+        <option value="pending">Pending</option><option value="in_progress">In Progress</option><option value="completed">Completed</option><option value="overdue">Overdue</option>
+      </select>
+      <select class="form-select" name="priority">
+        <option value="">All priority</option>
+        <option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option><option value="urgent">Urgent</option>
+      </select>
+      <button class="btn btn-outline-primary">Filter</button>
+    </form>
+    {% if request.user.is_admin_role %}<a href="{% url 'tasks:create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Assign task</a>{% endif %}
+  </div>
+  <div class="task-board">
+    {% for task in tasks %}
+      <article class="task-card priority-{{ task.priority }}">
+        <div class="d-flex justify-content-between gap-3">
+          <h2><a href="{% url 'tasks:detail' task.pk %}">{{ task.title }}</a></h2>
+          <span class="status-pill status-{{ task.status }}">{{ task.get_status_display }}</span>
+        </div>
+        <p>{{ task.description|truncatewords:18 }}</p>
+        <div class="task-meta"><span><i class="bi bi-person"></i> {{ task.assigned_to.full_name }}</span><span><i class="bi bi-calendar"></i> {{ task.due_date|date:"M d" }}</span></div>
+        <div class="progress slim"><div class="progress-bar" style="width: {{ task.progress }}%"></div></div>
+      </article>
+    {% empty %}
+      <p class="text-secondary">No tasks found.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

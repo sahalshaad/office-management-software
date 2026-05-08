@@ -1,0 +1,5 @@
+{% extends "base/app.html" %}
+{% block page_title %}Send Notification{% endblock %}
+{% block content %}
+<form method="post" class="surface of-form">{% csrf_token %}{{ form.as_p }}<button class="btn btn-primary">Send</button></form>
+{% endblock %}

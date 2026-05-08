@@ -1,0 +1,40 @@
+services:
+  web:
+    build: .
+    env_file: .env
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    expose:
+      - "8000"
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-officeflow}
+      POSTGRES_USER: ${POSTGRES_USER:-officeflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-officeflow_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+
+  nginx:
+    image: nginx:1.27-alpine
+    depends_on:
+      - web
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - static_volume:/app/staticfiles:ro
+      - media_volume:/app/media:ro
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:

@@ -1,0 +1,69 @@
+{% extends "base/app.html" %}
+{% block page_title %}{% if is_admin_dashboard %}Operations Dashboard{% else %}My Dashboard{% endif %}{% endblock %}
+{% block content %}
+<div class="metric-grid">
+  <article class="metric-card"><span>Present Today</span><strong>{{ attendance_stats.present }}</strong><i class="bi bi-person-check"></i></article>
+  <article class="metric-card"><span>Absent Today</span><strong>{{ attendance_stats.absent }}</strong><i class="bi bi-person-x"></i></article>
+  <article class="metric-card"><span>Late Marks</span><strong>{{ attendance_stats.late }}</strong><i class="bi bi-clock-history"></i></article>
+  <article class="metric-card"><span>Monthly Hours</span><strong>{{ attendance_stats.working_hours }}</strong><i class="bi bi-hourglass-split"></i></article>
+</div>
+
+<div class="dashboard-grid">
+  <section class="surface">
+    <div class="section-head">
+      <div><p class="eyebrow">Analytics</p><h2 class="section-title">Attendance mix</h2></div>
+    </div>
+    <canvas id="attendanceChart" height="120"></canvas>
+  </section>
+  <section class="surface">
+    <div class="section-head">
+      <div><p class="eyebrow">Workload</p><h2 class="section-title">Task progress</h2></div>
+      <a href="{% url 'tasks:list' %}" class="btn btn-sm btn-outline-primary">View</a>
+    </div>
+    <div class="progress-ring" style="--value: {{ tasks_completed|default:0 }};">
+      <span>{{ tasks_completed }}/{{ tasks_total }}</span>
+    </div>
+    <p class="text-secondary mb-0">{{ tasks_overdue }} overdue task{{ tasks_overdue|pluralize }}.</p>
+  </section>
+</div>
+
+<section class="surface">
+  <div class="section-head">
+    <div><p class="eyebrow">Recent</p><h2 class="section-title">Tasks</h2></div>
+    {% if request.user.is_admin_role %}<a href="{% url 'tasks:create' %}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Assign</a>{% endif %}
+  </div>
+  <div class="responsive-table">
+    <table class="table align-middle">
+      <thead><tr><th>Task</th><th>Owner</th><th>Status</th><th>Due</th><th>Progress</th></tr></thead>
+      <tbody>
+        {% for task in recent_tasks %}
+          <tr>
+            <td><a href="{% url 'tasks:detail' task.pk %}">{{ task.title }}</a></td>
+            <td>{{ task.assigned_to.full_name }}</td>
+            <td><span class="status-pill status-{{ task.status }}">{{ task.get_status_display }}</span></td>
+            <td>{{ task.due_date|date:"M d, H:i" }}</td>
+            <td>{{ task.progress }}%</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5" class="text-secondary">No tasks yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{{ attendance_stats.status_breakdown|json_script:"attendance-data" }}
+{% endblock %}
+{% block extra_js %}
+<script>
+const rawAttendance = JSON.parse(document.getElementById("attendance-data").textContent || "[]");
+const labels = rawAttendance.map(item => item.status);
+const values = rawAttendance.map(item => item.count);
+if (document.getElementById("attendanceChart")) {
+  new Chart(document.getElementById("attendanceChart"), {
+    type: "doughnut",
+    data: { labels, datasets: [{ data: values.length ? values : [1], backgroundColor: ["#2557a7", "#e2a93b", "#26a269", "#d64550"] }] },
+    options: { plugins: { legend: { position: "bottom" } }, cutout: "68%" }
+  });
+}
+</script>
+{% endblock %}

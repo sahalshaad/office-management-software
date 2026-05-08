@@ -1,0 +1,39 @@
+{% extends "base/app.html" %}
+{% block page_title %}Staff Management{% endblock %}
+{% block content %}
+<section class="surface">
+  <div class="section-head">
+    <form class="filter-row" method="get">
+      <input class="form-control" name="q" value="{{ request.GET.q }}" placeholder="Search staff">
+      <select class="form-select" name="department">
+        <option value="">All departments</option>
+        {% for department in departments %}<option value="{{ department.id }}">{{ department.name }}</option>{% endfor %}
+      </select>
+      <button class="btn btn-outline-primary"><i class="bi bi-search"></i></button>
+    </form>
+    <a class="btn btn-primary" href="{% url 'accounts:staff_create' %}"><i class="bi bi-plus-lg"></i> Add staff</a>
+  </div>
+  <div class="responsive-table">
+    <table class="table align-middle">
+      <thead><tr><th>Employee</th><th>ID</th><th>Department</th><th>Role</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        {% for person in staff %}
+          <tr>
+            <td><strong>{{ person.full_name }}</strong><br><span class="text-secondary">{{ person.email }}</span></td>
+            <td>{{ person.employee_id }}</td>
+            <td>{{ person.department|default:"-" }}</td>
+            <td>{{ person.get_role_display }}</td>
+            <td><span class="status-pill status-{{ person.status }}">{{ person.get_status_display }}</span></td>
+            <td class="text-end">
+              <a class="btn btn-sm btn-light" href="{% url 'accounts:staff_update' person.pk %}"><i class="bi bi-pencil"></i></a>
+              <a class="btn btn-sm btn-outline-danger" href="{% url 'accounts:staff_delete' person.pk %}"><i class="bi bi-archive"></i></a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="text-secondary">No staff found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

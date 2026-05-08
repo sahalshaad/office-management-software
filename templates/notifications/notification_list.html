@@ -1,0 +1,22 @@
+{% extends "base/app.html" %}
+{% block page_title %}Notifications{% endblock %}
+{% block content %}
+<section class="surface">
+  <div class="section-head">
+    <h2 class="section-title">Inbox</h2>
+    {% if request.user.is_admin_role %}<a href="{% url 'notifications:create' %}" class="btn btn-primary">Send notification</a>{% endif %}
+  </div>
+  <div class="notification-list">
+    {% for item in notifications %}
+      <article>
+        <span class="status-pill">{{ item.get_notification_type_display }}</span>
+        <h3>{{ item.title }}</h3>
+        <p>{{ item.message }}</p>
+        <time>{{ item.created_at|date:"M d, Y H:i" }}</time>
+      </article>
+    {% empty %}
+      <p class="text-secondary">No notifications yet.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

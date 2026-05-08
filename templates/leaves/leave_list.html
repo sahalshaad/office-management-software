@@ -1,0 +1,38 @@
+{% extends "base/app.html" %}
+{% block page_title %}Leave Management{% endblock %}
+{% block content %}
+<div class="metric-grid leave-metrics">
+  <article class="metric-card"><span>Casual</span><strong>{{ balance.casual_balance|default:"-" }}</strong><i class="bi bi-cup-hot"></i></article>
+  <article class="metric-card"><span>Sick</span><strong>{{ balance.sick_balance|default:"-" }}</strong><i class="bi bi-heart-pulse"></i></article>
+  <article class="metric-card"><span>Paid</span><strong>{{ balance.paid_balance|default:"-" }}</strong><i class="bi bi-wallet2"></i></article>
+  <article class="metric-card"><span>Emergency</span><strong>{{ balance.emergency_balance|default:"-" }}</strong><i class="bi bi-lightning-charge"></i></article>
+</div>
+<section class="surface">
+  <div class="section-head">
+    <form class="filter-row" method="get">
+      <select class="form-select" name="status"><option value="">All status</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select>
+      <button class="btn btn-outline-primary">Filter</button>
+    </form>
+    <a class="btn btn-primary" href="{% url 'leaves:apply' %}"><i class="bi bi-plus-lg"></i> Apply leave</a>
+  </div>
+  <div class="responsive-table">
+    <table class="table align-middle">
+      <thead><tr><th>Employee</th><th>Type</th><th>Dates</th><th>Days</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        {% for leave in leaves %}
+          <tr>
+            <td>{{ leave.user.full_name }}</td>
+            <td>{{ leave.get_leave_type_display }}</td>
+            <td>{{ leave.start_date }} to {{ leave.end_date }}</td>
+            <td>{{ leave.days }}</td>
+            <td><span class="status-pill status-{{ leave.status }}">{{ leave.get_status_display }}</span></td>
+            <td>{% if request.user.is_admin_role and leave.status == "pending" %}<a class="btn btn-sm btn-light" href="{% url 'leaves:review' leave.pk %}">Review</a>{% endif %}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="text-secondary">No leave requests found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

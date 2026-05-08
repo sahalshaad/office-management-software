@@ -1,0 +1,41 @@
+{% extends "base/app.html" %}
+{% load static %}
+{% block page_title %}Attendance{% endblock %}
+{% block content %}
+<div class="attendance-layout">
+  <section class="surface punch-panel">
+    <p class="eyebrow">{{ office.name|default:"Office not configured" }}</p>
+    <h2 class="section-title">Location verified punch</h2>
+    <div class="location-state" data-location-state>
+      <i class="bi bi-crosshair"></i>
+      <span>Waiting for location permission</span>
+    </div>
+    <video class="selfie-video" data-selfie-video autoplay playsinline muted hidden></video>
+    <canvas data-selfie-canvas hidden></canvas>
+    <div class="punch-actions">
+      <button class="btn btn-primary btn-lg" data-punch="in"><i class="bi bi-box-arrow-in-right"></i> Punch In</button>
+      <button class="btn btn-outline-primary btn-lg" data-punch="out"><i class="bi bi-box-arrow-right"></i> Punch Out</button>
+    </div>
+    <label class="form-check mt-3">
+      <input class="form-check-input" type="checkbox" data-selfie-toggle>
+      <span class="form-check-label">Capture selfie with punch</span>
+    </label>
+    <p class="text-secondary mt-3 mb-0" data-punch-message>GPS accuracy, IP address, browser, timestamp, and distance are logged.</p>
+  </section>
+  <section class="surface">
+    <h2 class="section-title">Today</h2>
+    {% if today_record %}
+      <dl class="detail-list">
+        <div><dt>Status</dt><dd><span class="status-pill status-{{ today_record.status }}">{{ today_record.get_status_display }}</span></dd></div>
+        <div><dt>Punch in</dt><dd>{{ today_record.punch_in_at|date:"H:i" }}</dd></div>
+        <div><dt>Punch out</dt><dd>{{ today_record.punch_out_at|date:"H:i"|default:"-" }}</dd></div>
+        <div><dt>Working hours</dt><dd>{{ today_record.working_hours }}</dd></div>
+      </dl>
+    {% else %}
+      <p class="text-secondary">No punch recorded today.</p>
+    {% endif %}
+    <a href="{% url 'attendance:history' %}" class="btn btn-light w-100">View history</a>
+  </section>
+</div>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/attendance.js' %}"></script>{% endblock %}

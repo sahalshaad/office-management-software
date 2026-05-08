@@ -1,0 +1,14 @@
+{% extends "base/app.html" %}
+{% block page_title %}Departments{% endblock %}
+{% block content %}
+<section class="surface">
+  <div class="section-head"><h2 class="section-title">Departments</h2><a class="btn btn-primary" href="{% url 'accounts:department_create' %}">New department</a></div>
+  <div class="card-grid">
+    {% for department in departments %}
+      <article class="mini-card"><strong>{{ department.name }}</strong><span>{{ department.code }}</span><p>{{ department.description|default:"No description" }}</p></article>
+    {% empty %}
+      <p class="text-secondary">No departments configured.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% load static %}
+{
+  "name": "OfficeFlow",
+  "short_name": "OfficeFlow",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f7fb",
+  "theme_color": "#2557a7",
+  "icons": [
+    {
+      "src": "{% static 'img/icon.svg' %}",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

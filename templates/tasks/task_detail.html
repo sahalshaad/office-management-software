@@ -1,0 +1,34 @@
+{% extends "base/app.html" %}
+{% block page_title %}Task Detail{% endblock %}
+{% block content %}
+<div class="dashboard-grid">
+  <section class="surface">
+    <div class="section-head">
+      <div><p class="eyebrow">{{ task.get_priority_display }}</p><h2 class="section-title">{{ task.title }}</h2></div>
+      <a class="btn btn-light" href="{% url 'tasks:edit' task.pk %}">Update</a>
+    </div>
+    <p>{{ task.description }}</p>
+    <dl class="detail-list">
+      <div><dt>Assigned to</dt><dd>{{ task.assigned_to.full_name }}</dd></div>
+      <div><dt>Status</dt><dd><span class="status-pill status-{{ task.status }}">{{ task.get_status_display }}</span></dd></div>
+      <div><dt>Due</dt><dd>{{ task.due_date|date:"M d, Y H:i" }}</dd></div>
+      <div><dt>Progress</dt><dd>{{ task.progress }}%</dd></div>
+    </dl>
+  </section>
+  <section class="surface">
+    <h2 class="section-title">Comments</h2>
+    <div class="comment-list">
+      {% for comment in task.comments.all %}
+        <article><strong>{{ comment.author.full_name }}</strong><p>{{ comment.comment }}</p><span>{{ comment.created_at|timesince }} ago</span></article>
+      {% empty %}
+        <p class="text-secondary">No comments yet.</p>
+      {% endfor %}
+    </div>
+    <form method="post" enctype="multipart/form-data" class="of-form mt-3">
+      {% csrf_token %}
+      {{ comment_form.as_p }}
+      <button class="btn btn-primary">Add comment</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

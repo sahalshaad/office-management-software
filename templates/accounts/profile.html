@@ -1,0 +1,9 @@
+{% extends "base/app.html" %}
+{% block page_title %}Profile{% endblock %}
+{% block content %}
+<form method="post" enctype="multipart/form-data" class="surface of-form narrow-form">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button class="btn btn-primary">Update profile</button>
+</form>
+{% endblock %}
