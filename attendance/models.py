@@ -2,6 +2,7 @@ from datetime import time
 
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
 from django.utils import timezone
 
 from core.models import SoftDeleteModel, TimeStampedModel
@@ -10,8 +11,8 @@ from core.models import SoftDeleteModel, TimeStampedModel
 class OfficeLocation(SoftDeleteModel):
     name = models.CharField(max_length=120, default="Head Office")
     address = models.TextField(blank=True)
-    latitude = models.DecimalField(max_digits=10, decimal_places=7)
-    longitude = models.DecimalField(max_digits=10, decimal_places=7)
+    latitude = models.DecimalField(max_digits=12, decimal_places=8)
+    longitude = models.DecimalField(max_digits=12, decimal_places=8)
     radius_meters = models.PositiveIntegerField(default=50)
     start_time = models.TimeField(default=time(9, 30))
     end_time = models.TimeField(default=time(18, 30))
@@ -39,13 +40,13 @@ class Attendance(SoftDeleteModel):
     date = models.DateField(default=timezone.localdate, db_index=True)
     punch_in_at = models.DateTimeField(null=True, blank=True)
     punch_out_at = models.DateTimeField(null=True, blank=True)
-    punch_in_latitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
-    punch_in_longitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
-    punch_out_latitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
-    punch_out_longitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    punch_in_latitude = models.DecimalField(max_digits=12, decimal_places=8, null=True, blank=True)
+    punch_in_longitude = models.DecimalField(max_digits=12, decimal_places=8, null=True, blank=True)
+    punch_out_latitude = models.DecimalField(max_digits=12, decimal_places=8, null=True, blank=True)
+    punch_out_longitude = models.DecimalField(max_digits=12, decimal_places=8, null=True, blank=True)
     punch_in_distance_m = models.DecimalField(max_digits=9, decimal_places=2, null=True, blank=True)
     punch_out_distance_m = models.DecimalField(max_digits=9, decimal_places=2, null=True, blank=True)
-    gps_accuracy_m = models.DecimalField(max_digits=9, decimal_places=2, null=True, blank=True)
+    gps_accuracy_m = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     punch_in_ip = models.GenericIPAddressField(null=True, blank=True)
     punch_out_ip = models.GenericIPAddressField(null=True, blank=True)
     punch_in_device = models.TextField(blank=True)
@@ -59,7 +60,13 @@ class Attendance(SoftDeleteModel):
 
     class Meta:
         ordering = ["-date", "-punch_in_at"]
-        constraints = [models.UniqueConstraint(fields=["user", "date"], name="unique_attendance_per_user_date")]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "date"],
+                condition=Q(is_deleted=False),
+                name="unique_attendance_per_user_date",
+            )
+        ]
         indexes = [
             models.Index(fields=["date", "status"]),
             models.Index(fields=["user", "date"]),
@@ -85,9 +92,9 @@ class AttendanceAttempt(TimeStampedModel):
     action = models.CharField(max_length=16, choices=[("in", "Punch In"), ("out", "Punch Out")])
     allowed = models.BooleanField(default=False)
     reason = models.CharField(max_length=255, blank=True)
-    latitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
-    longitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
-    accuracy_m = models.DecimalField(max_digits=9, decimal_places=2, null=True, blank=True)
+    latitude = models.DecimalField(max_digits=12, decimal_places=8, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=12, decimal_places=8, null=True, blank=True)
+    accuracy_m = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     distance_m = models.DecimalField(max_digits=9, decimal_places=2, null=True, blank=True)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.TextField(blank=True)

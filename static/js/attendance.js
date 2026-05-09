@@ -52,7 +52,13 @@
 
   async function punch(action) {
     const button = document.querySelector(`[data-punch="${action}"]`);
+    const otherAction = action === "in" ? "out" : "in";
+    const otherButton = document.querySelector(`[data-punch="${otherAction}"]`);
+    
+    // Prevent double-click
+    if (button.disabled) return;
     button.disabled = true;
+    
     try {
       const location = await locate();
       const selfie_data = await ensureCamera();
@@ -61,17 +67,37 @@
         headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken() },
         body: JSON.stringify({ ...location, selfie_data })
       });
+      
+      // Check response status first, before parsing JSON
+      if (!response.ok) {
+        let errorMessage = "Attendance could not be marked.";
+        try {
+          const data = await response.json();
+          errorMessage = data.detail || errorMessage;
+        } catch (parseError) {
+          // Response is not JSON (likely HTML error page)
+          console.error("API returned non-JSON response", response.status, response.statusText);
+          errorMessage = `API Error: ${response.status} ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
+      }
+      
+      // Parse successful JSON response
       const data = await response.json();
-      if (!response.ok) throw new Error(data.detail || "Attendance could not be marked.");
       message.textContent = `${action === "in" ? "Punch in" : "Punch out"} recorded successfully.`;
       message.classList.remove("text-secondary");
       message.classList.add("text-success");
+      
+      // Disable current button, enable the other one
+      button.disabled = true;
+      if (otherButton) otherButton.disabled = false;
+      
       window.setTimeout(() => window.location.reload(), 900);
     } catch (error) {
       message.textContent = error.message;
       message.classList.remove("text-secondary", "text-success");
       message.classList.add("text-danger");
-    } finally {
+      // Re-enable button on error so user can retry
       button.disabled = false;
     }
   }

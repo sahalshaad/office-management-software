@@ -1,5 +1,6 @@
 import base64
 import binascii
+import logging
 import uuid
 from datetime import datetime, timedelta
 
@@ -13,6 +14,8 @@ from django.utils import timezone
 from accounts.models import User
 from attendance.models import Attendance, AttendanceAttempt, OfficeLocation
 from core.utils import get_client_ip, haversine_distance_meters
+
+logger = logging.getLogger(__name__)
 
 
 class AttendanceValidationError(ValueError):
@@ -97,7 +100,9 @@ def punch_in(user, request, latitude, longitude, accuracy_m=None, selfie_data=No
     try:
         office, distance = validate_office_location(latitude, longitude, accuracy_m)
         today = timezone.localdate()
-        if Attendance.objects.filter(user=user, date=today, punch_in_at__isnull=False).exists():
+        # Check all records (including soft-deleted) to properly handle duplicates
+        existing = Attendance.all_objects.filter(user=user, date=today).first()
+        if existing and existing.punch_in_at:
             raise AttendanceValidationError("You have already punched in today.")
         now = timezone.now()
         attendance = Attendance.objects.create(
@@ -121,10 +126,14 @@ def punch_in(user, request, latitude, longitude, accuracy_m=None, selfie_data=No
     except AttendanceValidationError as exc:
         log_attempt(user, "in", request, False, str(exc), office, latitude, longitude, accuracy_m, distance)
         raise
+    except Exception as exc:
+        logger.exception("Unexpected error in punch_in service")
+        log_attempt(user, "in", request, False, f"Unexpected error: {str(exc)}", office, latitude, longitude, accuracy_m, distance)
+        raise
 
 
 @transaction.atomic
-def punch_out(user, request, latitude, longitude, accuracy_m=None, notes=""):
+def punch_out(user, request, latitude, longitude, accuracy_m=None, selfie_data=None, notes=""):
     office = None
     distance = None
     try:
@@ -150,6 +159,10 @@ def punch_out(user, request, latitude, longitude, accuracy_m=None, notes=""):
         return attendance
     except AttendanceValidationError as exc:
         log_attempt(user, "out", request, False, str(exc), office, latitude, longitude, accuracy_m, distance)
+        raise
+    except Exception as exc:
+        logger.exception("Unexpected error in punch_out service")
+        log_attempt(user, "out", request, False, f"Unexpected error: {str(exc)}", office, latitude, longitude, accuracy_m, distance)
         raise
 
 

@@ -1,5 +1,200 @@
 {% extends "base/app.html" %}
+{% load static %}
 {% block page_title %}Send Notification{% endblock %}
 {% block content %}
-<form method="post" class="surface of-form">{% csrf_token %}{{ form.as_p }}<button class="btn btn-primary">Send</button></form>
+<div class="notifications-page">
+  <form method="post" class="surface notifications-form" novalidate>
+    {% csrf_token %}
+    <div class="section-head mb-4">
+      <div>
+        <p class="eyebrow mb-1">Internal communication</p>
+        <h2 class="section-title">Send a notification</h2>
+        <p class="text-muted mb-0">Craft messages for your team with smart recipient selection and preview before sending.</p>
+      </div>
+    </div>
+
+    {% if form.non_field_errors %}
+    <div class="alert alert-danger mb-4">
+      {{ form.non_field_errors }}
+    </div>
+    {% endif %}
+
+    <div class="notifications-layout">
+      <section class="notification-composer panel-card">
+        <div class="panel-card-header">
+          <div>
+            <h3 class="panel-card-title">Message details</h3>
+            <p class="text-muted">Enter the notification subject, body, and targeting options.</p>
+          </div>
+        </div>
+
+        <div class="field-grid">
+          <div class="form-field">
+            <label for="id_title">Title</label>
+            {{ form.title }}
+            {% if form.title.errors %}
+            <div class="field-error">{{ form.title.errors }}</div>
+            {% endif %}
+          </div>
+
+          <div class="form-field">
+            <label for="id_notification_type">Notification type</label>
+            {{ form.notification_type }}
+            {% if form.notification_type.errors %}
+            <div class="field-error">{{ form.notification_type.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label for="id_message">Message</label>
+          {{ form.message }}
+          {% if form.message.errors %}
+          <div class="field-error">{{ form.message.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="field-grid field-grid-2">
+          <div class="form-field compact-checkbox">
+            <label class="checkbox-label">
+              {{ form.is_global }}
+              <span>Global notification</span>
+            </label>
+            {% if form.is_global.errors %}
+            <div class="field-error">{{ form.is_global.errors }}</div>
+            {% endif %}
+            <p class="text-muted small mb-0">Send to all staff regardless of individual selection.</p>
+          </div>
+
+          <div class="form-field">
+            <label for="id_target_role">Target role</label>
+            {{ form.target_role }}
+            {% if form.target_role.errors %}
+            <div class="field-error">{{ form.target_role.errors }}</div>
+            {% endif %}
+            <p class="text-muted small mb-0">Use role targeting for announcements to specific employee groups.</p>
+          </div>
+        </div>
+      </section>
+
+      <aside class="recipient-panel panel-card">
+        <div class="panel-card-header recipient-panel-header">
+          <div>
+            <h3 class="panel-card-title">Recipients</h3>
+            <p class="text-muted">Filter and select staff from departments and roles.</p>
+          </div>
+          <div class="recipient-summary" data-recipient-count>0 staff selected</div>
+        </div>
+
+        <div class="recipient-filters">
+          <div class="filter-input">
+            <label for="recipientSearch">Search staff</label>
+            <input type="search" id="recipientSearch" class="form-control" placeholder="Search by name, email, department" data-recipient-search />
+          </div>
+
+          <div class="filter-row">
+            <div class="filter-input">
+              <label for="departmentFilter">Department</label>
+              <select id="departmentFilter" class="form-select" data-department-filter>
+                <option value="">All departments</option>
+                {% for department in departments %}
+                <option value="{{ department.name }}">{{ department.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="filter-input">
+              <label for="roleFilter">Role filter</label>
+              <select id="roleFilter" class="form-select" data-role-filter>
+                <option value="">All roles</option>
+                {% for role_value, role_label in role_choices %}
+                <option value="{{ role_value }}">{{ role_label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <label class="select-all-row">
+            <input type="checkbox" data-select-all />
+            <span>Select all visible staff</span>
+          </label>
+        </div>
+
+        <div class="recipient-list" data-recipient-list>
+          {% if users %}
+          {% for user in users %}
+          <label class="recipient-card" data-user-id="{{ user.id }}" data-role="{{ user.role }}" data-department="{{ user.department.name|default:'Unassigned' }}">
+            <input type="checkbox" name="recipients" value="{{ user.id }}" class="recipient-checkbox" hidden />
+            <div class="recipient-card-content">
+              <div class="recipient-avatar">{{ user.first_name|first|default:'U' }}{{ user.last_name|first|default:'' }}</div>
+              <div class="recipient-info">
+                <strong>{{ user.full_name }}</strong>
+                <span class="recipient-email">{{ user.email }}</span>
+                <span class="recipient-meta">{{ user.department.name|default:'Unassigned' }} • {{ user.get_role_display }}</span>
+              </div>
+            </div>
+            <div class="recipient-checkmark">
+              <i class="bi bi-check-lg"></i>
+            </div>
+          </label>
+          {% endfor %}
+          {% else %}
+          <div class="recipient-empty-state">
+            <i class="bi bi-people-fill"></i>
+            <p class="mb-2">No staff members are available.</p>
+            <p class="text-muted">Add active employees to send notifications to your team.</p>
+          </div>
+          {% endif %}
+        </div>
+
+        {% if form.recipients.errors %}
+        <div class="field-error mt-3">{{ form.recipients.errors }}</div>
+        {% endif %}
+      </aside>
+    </div>
+
+    <div class="form-actions form-actions-sticky">
+      <button type="button" class="btn btn-outline-secondary cancel-button">Cancel</button>
+      <button type="button" class="btn btn-outline-primary preview-button">Preview</button>
+      <button type="submit" class="btn btn-primary send-button">
+        <span>Send Notification</span>
+        <span class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>
+      </button>
+    </div>
+  </form>
+</div>
+
+<div class="modal fade" id="notificationPreviewModal" tabindex="-1" aria-labelledby="notificationPreviewLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h5 class="modal-title" id="notificationPreviewLabel">Preview notification</h5>
+          <p class="text-muted mb-0">Review your message and recipients before sending.</p>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="notification-preview-summary">
+          <div><strong>Title:</strong> <span data-preview-title></span></div>
+          <div><strong>Type:</strong> <span data-preview-type></span></div>
+          <div><strong>Target:</strong> <span data-preview-target></span></div>
+          <div><strong>Recipients:</strong> <span data-preview-recipients></span></div>
+        </div>
+        <div class="notification-preview-message card-panel mt-4">
+          <h6 class="mb-3">Message</h6>
+          <div data-preview-message class="preview-message-body"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Edit</button>
+        <button type="button" class="btn btn-primary preview-confirm-button">Confirm & Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/notifications.js' %}"></script>
 {% endblock %}

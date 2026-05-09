@@ -12,11 +12,14 @@ class OfficeLocationAdmin(admin.ModelAdmin):
 
 @admin.register(Attendance)
 class AttendanceAdmin(admin.ModelAdmin):
-    list_display = ("user", "date", "status", "punch_in_at", "punch_out_at", "working_hours", "is_manual")
-    list_filter = ("status", "date", "office", "is_manual")
+    list_display = ("user", "date", "status", "punch_in_at", "punch_out_at", "working_hours", "is_manual", "is_deleted")
+    list_filter = ("status", "date", "office", "is_manual", "is_deleted")
     search_fields = ("user__first_name", "user__last_name", "user__employee_id", "user__email")
     readonly_fields = ("work_seconds", "created_at", "updated_at")
     date_hierarchy = "date"
+
+    def get_queryset(self, request):
+        return Attendance.all_objects.all()
 
 
 @admin.register(AttendanceAttempt)
