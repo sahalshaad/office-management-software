@@ -20,13 +20,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const previewRecipients = previewModalElement.querySelector("[data-preview-recipients]");
   const previewMessage = previewModalElement.querySelector("[data-preview-message]");
   const previewConfirmButton = previewModalElement.querySelector(".preview-confirm-button");
+  const previewCloseButtons = previewModalElement.querySelectorAll("[data-modal-close]");
 
   const titleInput = form.querySelector("#id_title");
   const typeInput = form.querySelector("#id_notification_type");
   const targetRoleInput = form.querySelector("#id_target_role");
   const messageInput = form.querySelector("#id_message");
-
-  const previewModal = previewModalElement ? new bootstrap.Modal(previewModalElement) : null;
 
   function showToast(title, message, variant = "primary") {
     const toast = document.querySelector("[data-live-toast]");
@@ -42,17 +41,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function updateRecipientDisplay() {
     const visibleCards = recipientCards.filter((card) => card.offsetParent !== null);
-    const checkedCards = visibleCards.filter((card) => card.querySelector(".recipient-checkbox").checked);
     const totalChecked = recipientCards.filter((card) => card.querySelector(".recipient-checkbox").checked).length;
     const totalCards = recipientCards.length;
 
     recipientCards.forEach((card) => {
       const checkbox = card.querySelector(".recipient-checkbox");
-      if (checkbox.checked) {
-        card.classList.add("selected");
-      } else {
-        card.classList.remove("selected");
-      }
+      card.classList.toggle("selected", checkbox.checked);
     });
 
     if (selectAllCheckbox) {
@@ -131,6 +125,14 @@ document.addEventListener("DOMContentLoaded", () => {
     return `${selected.length} staff selected`;
   }
 
+  function openPreviewModal() {
+    previewModalElement.classList.remove("hidden");
+  }
+
+  function closePreviewModal() {
+    previewModalElement.classList.add("hidden");
+  }
+
   function renderPreview() {
     if (!titleInput.value.trim() || !messageInput.value.trim()) {
       showToast("Validation required", "Please enter a title and message before previewing.", "danger");
@@ -144,10 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
       : "Target: All roles";
     previewRecipients.textContent = getSelectedRecipientsText();
     previewMessage.textContent = messageInput.value.trim();
-
-    if (previewModal) {
-      previewModal.show();
-    }
+    openPreviewModal();
   }
 
   function handleFormSubmit() {
@@ -175,15 +174,30 @@ document.addEventListener("DOMContentLoaded", () => {
   recipientCards.forEach((card) => {
     const checkbox = card.querySelector(".recipient-checkbox");
     checkbox.addEventListener("change", updateRecipientDisplay);
+    card.addEventListener("click", (event) => {
+      if (event.target.closest("input")) return;
+      checkbox.checked = !checkbox.checked;
+      updateRecipientDisplay();
+    });
   });
 
   if (previewButton) {
     previewButton.addEventListener("click", renderPreview);
   }
 
+  previewCloseButtons.forEach((button) => {
+    button.addEventListener("click", closePreviewModal);
+  });
+
+  previewModalElement.addEventListener("click", (event) => {
+    if (event.target === previewModalElement) {
+      closePreviewModal();
+    }
+  });
+
   if (previewConfirmButton) {
     previewConfirmButton.addEventListener("click", () => {
-      if (previewModal) previewModal.hide();
+      closePreviewModal();
       handleFormSubmit();
       form.submit();
     });

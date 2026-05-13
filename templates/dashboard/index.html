@@ -2,10 +2,26 @@
 {% block page_title %}{% if is_admin_dashboard %}Operations Dashboard{% else %}My Dashboard{% endif %}{% endblock %}
 {% block content %}
 <div class="metric-grid">
-  <article class="metric-card"><span>Present Today</span><strong>{{ attendance_stats.present }}</strong><i class="bi bi-person-check"></i></article>
-  <article class="metric-card"><span>Absent Today</span><strong>{{ attendance_stats.absent }}</strong><i class="bi bi-person-x"></i></article>
-  <article class="metric-card"><span>Late Marks</span><strong>{{ attendance_stats.late }}</strong><i class="bi bi-clock-history"></i></article>
-  <article class="metric-card"><span>Monthly Hours</span><strong>{{ attendance_stats.working_hours }}</strong><i class="bi bi-hourglass-split"></i></article>
+  <article class="metric-card card-present">
+    <span>Present Today</span>
+    <strong>{{ attendance_stats.present }}</strong>
+    <i class="bi bi-person-check"></i>
+  </article>
+  <article class="metric-card card-absent">
+    <span>Absent Today</span>
+    <strong>{{ attendance_stats.absent }}</strong>
+    <i class="bi bi-person-x"></i>
+  </article>
+  <article class="metric-card card-late">
+    <span>Late Marks</span>
+    <strong>{{ attendance_stats.late }}</strong>
+    <i class="bi bi-clock-history"></i>
+  </article>
+  <article class="metric-card card-hours">
+    <span>Monthly Hours</span>
+    <strong>{{ attendance_stats.working_hours }}</strong>
+    <i class="bi bi-hourglass-split"></i>
+  </article>
 </div>
 
 <div class="dashboard-grid">
@@ -18,16 +34,18 @@
   <section class="surface">
     <div class="section-head">
       <div><p class="eyebrow">Workload</p><h2 class="section-title">Task progress</h2></div>
-      <a href="{% url 'tasks:list' %}" class="btn btn-sm btn-outline-primary">View</a>
+      <a href="{% url 'tasks:list' %}" class="btn btn-sm btn-outline-primary">View all</a>
     </div>
     <div class="progress-ring" style="--value: {{ tasks_completed|default:0 }};">
       <span>{{ tasks_completed }}/{{ tasks_total }}</span>
     </div>
-    <p class="text-secondary mb-0">{{ tasks_overdue }} overdue task{{ tasks_overdue|pluralize }}.</p>
+    <p class="text-secondary mb-0" style="text-align:center;margin-top:0.75rem">
+      {% if tasks_overdue %}<span style="color:var(--danger);font-weight:600">{{ tasks_overdue }} overdue</span> task{{ tasks_overdue|pluralize }}.{% else %}All tasks on track.{% endif %}
+    </p>
   </section>
 </div>
 
-<section class="surface">
+<section class="surface" style="margin-top:1.25rem">
   <div class="section-head">
     <div><p class="eyebrow">Recent</p><h2 class="section-title">Tasks</h2></div>
     {% if request.user.is_admin_role %}<a href="{% url 'tasks:create' %}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Assign</a>{% endif %}
@@ -38,14 +56,21 @@
       <tbody>
         {% for task in recent_tasks %}
           <tr>
-            <td><a href="{% url 'tasks:detail' task.pk %}">{{ task.title }}</a></td>
+            <td><a href="{% url 'tasks:detail' task.pk %}" style="font-weight:500;color:var(--text)">{{ task.title }}</a></td>
             <td>{{ task.assigned_to.full_name }}</td>
             <td><span class="status-pill status-{{ task.status }}">{{ task.get_status_display }}</span></td>
-            <td>{{ task.due_date|date:"M d, H:i" }}</td>
-            <td>{{ task.progress }}%</td>
+            <td style="color:var(--muted)">{{ task.due_date|date:"M d, H:i" }}</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:0.5rem">
+                <div style="flex:1;height:4px;background:var(--border);border-radius:99px;overflow:hidden">
+                  <div style="height:100%;width:{{ task.progress }}%;background:var(--accent);border-radius:99px"></div>
+                </div>
+                <span style="font-size:0.75rem;color:var(--muted);white-space:nowrap">{{ task.progress }}%</span>
+              </div>
+            </td>
           </tr>
         {% empty %}
-          <tr><td colspan="5" class="text-secondary">No tasks yet.</td></tr>
+          <tr><td colspan="5" class="text-secondary" style="text-align:center;padding:2rem">No tasks yet.</td></tr>
         {% endfor %}
       </tbody>
     </table>
@@ -61,8 +86,11 @@ const values = rawAttendance.map(item => item.count);
 if (document.getElementById("attendanceChart")) {
   new Chart(document.getElementById("attendanceChart"), {
     type: "doughnut",
-    data: { labels, datasets: [{ data: values.length ? values : [1], backgroundColor: ["#2557a7", "#e2a93b", "#26a269", "#d64550"] }] },
-    options: { plugins: { legend: { position: "bottom" } }, cutout: "68%" }
+    data: { labels, datasets: [{ data: values.length ? values : [1], backgroundColor: ["#16a34a","#D97706","#2563EB","#DC2626"], borderWidth: 0 }] },
+    options: {
+      plugins: { legend: { position: "bottom", labels: { font: { family: "Inter", size: 12 }, padding: 16, usePointStyle: true } } },
+      cutout: "72%"
+    }
   });
 }
 </script>

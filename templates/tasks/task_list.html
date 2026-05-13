@@ -19,7 +19,7 @@
   <div class="task-board">
     {% for task in tasks %}
       <article class="task-card priority-{{ task.priority }}">
-        <div class="d-flex justify-content-between gap-3">
+        <div class="flex justify-between gap-3">
           <h2><a href="{% url 'tasks:detail' task.pk %}">{{ task.title }}</a></h2>
           <span class="status-pill status-{{ task.status }}">{{ task.get_status_display }}</span>
         </div>

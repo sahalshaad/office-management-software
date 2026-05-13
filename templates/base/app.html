@@ -1,132 +1,108 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="light">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#2557a7" />
-    <title>{% block title %}OfficeFlow{% endblock %}</title>
+    <meta name="theme-color" content="#16a34a" />
+    <title>{% block title %}PRE.POC{% endblock %}</title>
     <link rel="manifest" href="{% url 'manifest' %}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
-      rel="stylesheet"
-    />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
     <link href="{% static 'css/app.css' %}" rel="stylesheet" />
     {% block extra_css %}{% endblock %}
   </head>
   <body>
     <div class="app-shell">
-      <aside class="sidebar">
+      <aside class="sidebar" id="sidebar" aria-label="Main navigation">
         <a href="{% url 'dashboard' %}" class="brand">
-          <img
-            src="{% static 'img/icon.svg' %}"
-            alt="PRE.POC logo"
-            class="brand-logo"
-          />
+          <img src="{% static 'img/icon.svg' %}" alt="PRE.POC logo" class="brand-logo" />
           <span class="brand-name">PRE.POC</span>
         </a>
-        <nav class="nav flex-column gap-1">
-          <a class="nav-link" href="{% url 'dashboard' %}"
-            ><i class="bi bi-grid-1x2"></i><span>Dashboard</span></a
-          >
-          <a class="nav-link" href="{% url 'attendance:punch' %}"
-            ><i class="bi bi-geo-alt"></i><span>Attendance</span></a
-          >
-          <a class="nav-link" href="{% url 'tasks:list' %}"
-            ><i class="bi bi-check2-square"></i><span>Tasks</span></a
-          >
-          <a class="nav-link" href="{% url 'leaves:list' %}"
-            ><i class="bi bi-calendar2-week"></i><span>Leave</span></a
-          >
-          <a class="nav-link" href="{% url 'notifications:list' %}"
-            ><i class="bi bi-bell"></i><span>Notifications</span></a
-          >
-          <a class="nav-link" href="{% url 'reports:index' %}"
-            ><i class="bi bi-bar-chart"></i><span>Reports</span></a
-          >
+        <nav class="nav space-y-2">
+          <a class="nav-link {% if 'dashboard' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'dashboard' %}">
+            <i class="bi bi-grid-1x2"></i><span>Dashboard</span>
+          </a>
+          <a class="nav-link {% if 'attendance' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'attendance:punch' %}">
+            <i class="bi bi-geo-alt"></i><span>Attendance</span>
+          </a>
+          <a class="nav-link {% if 'tasks' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'tasks:list' %}">
+            <i class="bi bi-check2-square"></i><span>Tasks</span>
+          </a>
+          <a class="nav-link {% if 'leaves' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'leaves:list' %}">
+            <i class="bi bi-calendar2-week"></i><span>Leave</span>
+          </a>
+          <a class="nav-link {% if 'notifications' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'notifications:list' %}">
+            <i class="bi bi-bell"></i><span>Notifications</span>
+          </a>
+          <a class="nav-link {% if 'reports' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'reports:index' %}">
+            <i class="bi bi-bar-chart"></i><span>Reports</span>
+          </a>
           {% if request.user.is_admin_role %}
-          <a class="nav-link" href="{% url 'accounts:staff_list' %}"
-            ><i class="bi bi-people"></i><span>Staff</span></a
-          >
-          <a class="nav-link" href="{% url 'attendance:office_settings' %}"
-            ><i class="bi bi-building-gear"></i><span>Settings</span></a
-          >
+          <a class="nav-link {% if 'accounts' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'accounts:staff_list' %}">
+            <i class="bi bi-people"></i><span>Staff</span>
+          </a>
+          <a class="nav-link {% if 'office_settings' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'attendance:office_settings' %}">
+            <i class="bi bi-building-gear"></i><span>Settings</span>
+          </a>
           {% endif %}
         </nav>
+
+        <div class="sidebar-bottom">
+          <div class="sidebar-bottom-avatar">
+            {{ request.user.first_name|first|default:"U" }}{{ request.user.last_name|first|default:"" }}
+          </div>
+          <div class="sidebar-bottom-info">
+            <div class="sidebar-bottom-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+            <div class="sidebar-bottom-role">{{ request.user.get_role_display|default:"Member" }}</div>
+          </div>
+        </div>
       </aside>
 
       <main class="main-panel">
         <header class="topbar">
-          <button
-            class="icon-button d-lg-none"
-            data-sidebar-toggle
-            aria-label="Open navigation"
-          >
-            <i class="bi bi-list"></i>
-          </button>
-          <div>
-            <p class="eyebrow mb-1">
-              {{ request.user.get_role_display|default:"OfficeFlow" }}
-            </p>
-            <h1 class="page-title mb-0">
-              {% block page_title %}Dashboard{% endblock %}
-            </h1>
+          <div class="topbar-left">
+            <button class="icon-button mobile-sidebar-toggle" data-sidebar-toggle aria-label="Open navigation" id="sidebar-toggle-btn">
+              <i class="bi bi-list"></i>
+            </button>
+            <div class="topbar-search">
+              <i class="bi bi-search"></i>
+              <input type="search" placeholder="Search…" aria-label="Search" />
+            </div>
+            <div class="topbar-page-info">
+              <p class="eyebrow">{{ request.user.get_role_display|default:"PRE.POC" }}</p>
+              <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
+            </div>
           </div>
-          <div class="topbar-actions">
-            <button
-              class="icon-button"
-              data-theme-toggle
-              aria-label="Toggle dark mode"
-            >
+          <div class="topbar-right topbar-actions">
+            <button class="icon-button" data-theme-toggle aria-label="Toggle dark mode">
               <i class="bi bi-moon-stars"></i>
             </button>
-            <a
-              class="icon-button position-relative"
-              href="{% url 'notifications:list' %}"
-              aria-label="Notifications"
-            >
+            <a class="icon-button position-relative" href="{% url 'notifications:list' %}" aria-label="Notifications">
               <i class="bi bi-bell"></i>
               {% if unread_notifications_count %}
               <span class="badge-dot">{{ unread_notifications_count }}</span>
               {% endif %}
             </a>
-            <div class="dropdown">
-              <button
-                class="profile-chip"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
+            <div class="relative">
+              <button class="profile-chip" type="button" data-dropdown-toggle aria-expanded="false" aria-label="Profile menu">
                 {% if request.user.profile_photo %}
-                <img
-                  src="{{ request.user.profile_photo.url }}"
-                  alt="{{ request.user.get_full_name }}"
-                  class="user-avatar-image"
-                />
+                <img src="{{ request.user.profile_photo.url }}" alt="{{ request.user.get_full_name }}" class="user-avatar-image" />
                 {% else %}
-                <span class="user-avatar">
-                  {{ request.user.first_name|first|default:"U" }}{{ request.user.last_name|first|default:"" }}
-                </span>
+                <span class="user-avatar">{{ request.user.first_name|first|default:"U" }}{{ request.user.last_name|first|default:"" }}</span>
                 {% endif %}
               </button>
-              <ul class="dropdown-menu dropdown-menu-end">
-                <li>
-                  <a class="dropdown-item" href="{% url 'accounts:profile' %}"
-                    >Profile</a
-                  >
-                </li>
-                <li><hr class="dropdown-divider" /></li>
-                <li>
-                  <form method="post" action="{% url 'accounts:logout' %}">
-                    {% csrf_token %}
-                    <button class="dropdown-item" type="submit">Logout</button>
-                  </form>
-                </li>
-              </ul>
+              <div class="profile-dropdown hidden" data-dropdown-menu>
+                <a class="dropdown-item" href="{% url 'accounts:profile' %}"><i class="bi bi-person me-2"></i>Profile</a>
+                <div class="dropdown-divider"></div>
+                <form method="post" action="{% url 'accounts:logout' %}">
+                  {% csrf_token %}
+                  <button class="dropdown-item w-full text-left" type="submit"><i class="bi bi-box-arrow-right me-2"></i>Logout</button>
+                </form>
+              </div>
             </div>
           </div>
         </header>
@@ -134,9 +110,7 @@
         {% if messages %}
         <div class="toast-stack">
           {% for message in messages %}
-          <div class="alert alert-{{ message.tags|default:'info' }} shadow-sm">
-            {{ message }}
-          </div>
+          <div class="alert alert-{{ message.tags|default:'info' }} shadow-sm">{{ message }}</div>
           {% endfor %}
         </div>
         {% endif %}
@@ -147,8 +121,8 @@
       </main>
     </div>
 
+    <div class="sidebar-backdrop hidden" data-sidebar-backdrop></div>
     <div class="live-toast" data-live-toast hidden></div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="{% static 'js/app.js' %}"></script>
     {% block extra_js %}{% endblock %}

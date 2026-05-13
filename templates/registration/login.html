@@ -4,32 +4,64 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Login · OfficeFlow</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Sign In · PRE.POC</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <link href="{% static 'css/app.css' %}" rel="stylesheet">
 </head>
 <body class="auth-body">
   <main class="auth-shell">
     <section class="auth-panel">
-      <div class="brand brand-auth"><span class="brand-mark">OF</span><span>OfficeFlow</span></div>
-      <h1>Sign in</h1>
-      <p class="text-secondary">Access attendance, tasks, leave, reports, and team updates.</p>
+      <div class="brand brand-auth">
+        <span class="brand-mark">PP</span>
+        <span>PRE.POC</span>
+      </div>
+      <div>
+        <h1>Welcome back</h1>
+        <p>Secure access to attendance, tasks, leave requests, and HR operations.</p>
+      </div>
       {% if form.errors %}
-        <div class="alert alert-danger">Invalid credentials. Please try again.</div>
+      <div class="alert alert-danger">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        Invalid credentials. Please try again.
+      </div>
       {% endif %}
       {% if messages %}
-        {% for message in messages %}<div class="alert alert-{{ message.tags }}">{{ message }}</div>{% endfor %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
       {% endif %}
-      <form method="post" class="stack-form">
+      <form method="post" class="stack-form" novalidate>
         {% csrf_token %}
-        <label>Email or username {{ form.username }}</label>
-        <label>Password {{ form.password }}</label>
-        <button class="btn btn-primary btn-lg w-100" type="submit">Login</button>
+        <div class="form-field">
+          <label for="id_username">Email or username</label>
+          {{ form.username }}
+        </div>
+        <div class="form-field">
+          <label for="id_password">Password</label>
+          <div class="relative">
+            {{ form.password }}
+            <button type="button" class="password-toggle" data-password-toggle aria-label="Show password">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-lg" type="submit" style="border-radius:var(--r-lg)">Sign in →</button>
       </form>
-      <a class="auth-link" href="{% url 'accounts:password_reset' %}">Forgot password?</a>
+      <div>
+        <a class="auth-link" href="{% url 'accounts:password_reset' %}">
+          <i class="bi bi-key"></i> Forgot your password?
+        </a>
+      </div>
     </section>
+
     <aside class="auth-visual">
+      <div style="margin-bottom:1rem">
+        <div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.5);margin-bottom:0.5rem">Built for modern teams</div>
+        <div style="font-size:1.5rem;font-weight:800;letter-spacing:-0.02em;line-height:1.2">Smart HR.<br>Simple workflow.</div>
+      </div>
       <div class="auth-metric">
         <span>GPS Attendance</span>
         <strong>50m</strong>
@@ -44,5 +76,17 @@
       </div>
     </aside>
   </main>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggle = document.querySelector('[data-password-toggle]');
+      const passwordInput = document.querySelector('#id_password');
+      if (!toggle || !passwordInput) return;
+      toggle.addEventListener('click', () => {
+        const visible = passwordInput.type === 'text';
+        passwordInput.type = visible ? 'password' : 'text';
+        toggle.innerHTML = visible ? '<i class="bi bi-eye"></i>' : '<i class="bi bi-eye-slash"></i>';
+      });
+    });
+  </script>
 </body>
 </html>
