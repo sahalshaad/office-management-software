@@ -1,9 +1,75 @@
 {% extends "base/app.html" %}
-{% block page_title %}Profile{% endblock %}
+{% block page_title %}My Profile{% endblock %}
 {% block content %}
-<form method="post" enctype="multipart/form-data" class="surface of-form narrow-form">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button class="btn btn-primary">Update profile</button>
-</form>
+<div class="narrow-form">
+  <div class="surface" style="padding: 2rem;">
+    <div class="section-head mb-4">
+      <div>
+        <h2 class="section-title">Personal Information</h2>
+        <p class="text-secondary mt-1">Update your personal details and contact info.</p>
+      </div>
+    </div>
+    
+    <form method="post" enctype="multipart/form-data" class="stack-form">
+      {% csrf_token %}
+      
+      {% if form.non_field_errors %}
+      <div class="alert alert-danger mb-4">
+        {{ form.non_field_errors }}
+      </div>
+      {% endif %}
+
+      <div class="field-grid-2">
+        <div class="form-field">
+          <label for="{{ form.first_name.id_for_label }}">First name</label>
+          {{ form.first_name }}
+          {% if form.first_name.errors %}<div class="text-danger small">{{ form.first_name.errors }}</div>{% endif %}
+        </div>
+        <div class="form-field">
+          <label for="{{ form.last_name.id_for_label }}">Last name</label>
+          {{ form.last_name }}
+          {% if form.last_name.errors %}<div class="text-danger small">{{ form.last_name.errors }}</div>{% endif %}
+        </div>
+      </div>
+
+      <div class="field-grid-2">
+        <div class="form-field">
+          <label for="{{ form.phone.id_for_label }}">Phone number</label>
+          {{ form.phone }}
+          {% if form.phone.errors %}<div class="text-danger small">{{ form.phone.errors }}</div>{% endif %}
+        </div>
+        <div class="form-field">
+          <label for="{{ form.emergency_contact.id_for_label }}">Emergency contact</label>
+          {{ form.emergency_contact }}
+          {% if form.emergency_contact.errors %}<div class="text-danger small">{{ form.emergency_contact.errors }}</div>{% endif %}
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label for="{{ form.address.id_for_label }}">Address</label>
+        {{ form.address }}
+        {% if form.address.errors %}<div class="text-danger small">{{ form.address.errors }}</div>{% endif %}
+      </div>
+
+      <div class="form-field" style="margin-bottom: 1rem;">
+        <label for="{{ form.profile_photo.id_for_label }}">Profile photo</label>
+        <div class="flex items-center gap-4 mt-2">
+          {% if request.user.profile_photo %}
+          <img src="{{ request.user.profile_photo.url }}" alt="Current photo" class="recipient-avatar" style="width: 3rem; height: 3rem;">
+          {% else %}
+          <div class="recipient-avatar" style="width: 3rem; height: 3rem;">{{ request.user.first_name|first|default:"U" }}</div>
+          {% endif %}
+          <div style="flex: 1;">
+            {{ form.profile_photo }}
+          </div>
+        </div>
+        {% if form.profile_photo.errors %}<div class="text-danger small">{{ form.profile_photo.errors }}</div>{% endif %}
+      </div>
+
+      <div class="form-actions-sticky mt-4 pt-4 border-t border-slate-200" style="border-top: 1px solid var(--border);">
+        <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">Save changes</button>
+      </div>
+    </form>
+  </div>
+</div>
 {% endblock %}

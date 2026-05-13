@@ -12,22 +12,49 @@
       <div><dt>Assigned to</dt><dd>{{ task.assigned_to.full_name }}</dd></div>
       <div><dt>Status</dt><dd><span class="status-pill status-{{ task.status }}">{{ task.get_status_display }}</span></dd></div>
       <div><dt>Due</dt><dd>{{ task.due_date|date:"M d, Y H:i" }}</dd></div>
-      <div><dt>Progress</dt><dd>{{ task.progress }}%</dd></div>
+      <div>
+        <dt>Progress</dt>
+        <dd>
+          <div style="display:flex;align-items:center;gap:0.5rem;min-width:120px">
+            <div style="flex:1;height:4px;background:var(--border);border-radius:99px;overflow:hidden">
+              <div style="height:100%;width:{{ task.progress }}%;background:var(--accent);border-radius:99px"></div>
+            </div>
+            <span style="font-size:0.75rem;color:var(--muted);white-space:nowrap">{{ task.progress }}%</span>
+          </div>
+        </dd>
+      </div>
     </dl>
   </section>
   <section class="surface">
     <h2 class="section-title">Comments</h2>
     <div class="comment-list">
       {% for comment in task.comments.all %}
-        <article><strong>{{ comment.author.full_name }}</strong><p>{{ comment.comment }}</p><span>{{ comment.created_at|timesince }} ago</span></article>
+        <article>
+          <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:0.25rem;">
+            <strong style="color:var(--text); font-size:0.875rem;">{{ comment.author.full_name }}</strong>
+            <span style="font-size:0.75rem; color:var(--muted);">{{ comment.created_at|timesince }} ago</span>
+          </div>
+          <p style="color:var(--text-soft); font-size:0.875rem; line-height:1.4; margin:0;">{{ comment.comment }}</p>
+        </article>
       {% empty %}
-        <p class="text-secondary">No comments yet.</p>
+        <p class="text-secondary" style="padding:1rem 0; text-align:center;">No comments yet. Be the first to comment!</p>
       {% endfor %}
     </div>
-    <form method="post" enctype="multipart/form-data" class="of-form mt-3">
+    
+    <form method="post" enctype="multipart/form-data" class="of-form" style="margin-top:1.5rem; border-top:1px solid var(--border); padding-top:1.5rem;">
       {% csrf_token %}
-      {{ comment_form.as_p }}
-      <button class="btn btn-primary">Add comment</button>
+      <div class="form-field mb-3">
+        {{ comment_form.comment }}
+      </div>
+      {% if comment_form.attachment %}
+      <div class="form-field mb-3">
+        <label for="{{ comment_form.attachment.id_for_label }}" style="font-size:0.75rem;">Attachment (optional)</label>
+        {{ comment_form.attachment }}
+      </div>
+      {% endif %}
+      <div class="form-actions-sticky">
+        <button class="btn btn-primary">Post comment</button>
+      </div>
     </form>
   </section>
 </div>

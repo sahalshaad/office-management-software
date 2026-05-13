@@ -25,7 +25,12 @@
         </div>
         <p>{{ task.description|truncatewords:18 }}</p>
         <div class="task-meta"><span><i class="bi bi-person"></i> {{ task.assigned_to.full_name }}</span><span><i class="bi bi-calendar"></i> {{ task.due_date|date:"M d" }}</span></div>
-        <div class="progress slim"><div class="progress-bar" style="width: {{ task.progress }}%"></div></div>
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.75rem">
+          <div style="flex:1;height:4px;background:var(--border);border-radius:99px;overflow:hidden">
+            <div style="height:100%;width:{{ task.progress }}%;background:var(--accent);border-radius:99px"></div>
+          </div>
+          <span style="font-size:0.75rem;color:var(--muted);white-space:nowrap;font-weight:600">{{ task.progress }}%</span>
+        </div>
       </article>
     {% empty %}
       <p class="text-secondary">No tasks found.</p>
